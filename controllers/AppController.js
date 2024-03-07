@@ -1,38 +1,22 @@
-// api controller
-import dbClient from '../utils/db';
+import RedisClient from '../utils/redis';
+import DBClient from '../utils/db';
 
-const AppController = {
-  getStatus: async (req, res) => {
-    try {
-      const redisStatus = await dbClient.isAlive();
-      const dbStatus = await dbClient.isAlive();
+class AppController {
+  static getStatus(req, res) {
+    const data = {
+      redis: RedisClient.isAlive(),
+      db: DBClient.isAlive(),
+    };
+    return res.status(200).send(data);
+  }
 
-      res.status(200).json({
-        db: dbStatus,
-        redis: redisStatus,
-      });
-    } catch (err) {
-      res.status(500).json({
-        error: err.message,
-      });
-    }
-  },
-
-  getStats: async (req, res) => {
-    try {
-      const users = await dbClient.nbUsers();
-      const files = await dbClient.nbFiles();
-
-      res.status(200).json({
-        users,
-        files,
-      });
-    } catch (err) {
-      res.status(500).json({
-        error: err.message,
-      });
-    }
-  },
-};
+  static async getStats(req, res) {
+    const data = {
+      users: await DBClient.nbUsers(),
+      files: await DBClient.nbFiles(),
+    };
+    return res.status(200).send(data);
+  }
+}
 
 module.exports = AppController;
